@@ -1,0 +1,42 @@
+name: Snapshot download counts
+
+# GitHub keeps only a running total per asset, with no history and no dates,
+# and resets it for each new release. This records the number daily so there is
+# a time series to look back on.
+
+on:
+  schedule:
+    # 03:17 UTC daily. An odd minute — GitHub delays jobs scheduled on the hour,
+    # when everyone else's cron fires.
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: download-stats
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Record today's counts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./scripts/snapshot-downloads.sh
+
+      - name: Commit if the numbers moved
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add stats/downloads.csv
+          if git diff --quiet --cached; then
+            echo "No change since the last snapshot — nothing to commit."
+          else
+            git commit -m "Download counts for $(date -u +%F)"
+            git push
+          fi

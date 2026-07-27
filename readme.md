@@ -21,3 +21,16 @@ Tabula is pre-release software under active development. It's a
 [tabula.syncster.dev](https://tabula.syncster.dev).
 
 Licensed MIT OR Apache-2.0.
+
+## Download counts
+
+GitHub reports a running total per asset — no history, no dates, and the
+counter starts over with each release. [`stats/downloads.csv`](stats/downloads.csv)
+keeps the history GitHub discards: a workflow appends the day's numbers every
+morning, so daily and weekly deltas can be worked out after the fact.
+
+```bash
+./scripts/snapshot-downloads.sh   # record today's numbers by hand
+```
+
+Re-running on the same day replaces that day's rows rather than adding to them.
